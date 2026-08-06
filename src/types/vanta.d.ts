@@ -12,10 +12,14 @@ declare module 'vanta/dist/vanta.clouds.min' {
     minHeight?: number
     minWidth?: number
     skyColor?: number
+    cloudColor?: number
     cloudShadowColor?: number
     sunColor?: number
     sunGlareColor?: number
+    sunlightColor?: number
     speed?: number
+    backgroundColor?: number
+    backgroundAlpha?: number
   }
   export default function CLOUDS(options: CloudsOptions): VantaEffect
 }

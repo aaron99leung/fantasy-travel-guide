@@ -124,6 +124,7 @@ export default function Home() {
         cloudColor: 0xbebebe,
         cloudShadowColor: 0x3e3e59,
         sunColor: 0xff8e00,
+        sunlightColor: 0xff8c21,
         sunGlareColor: 0xf7612f,
         speed: 0.70
       })
