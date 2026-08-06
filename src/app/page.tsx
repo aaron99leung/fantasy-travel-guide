@@ -91,6 +91,10 @@ export default function Home() {
   const [isChatLoading, setIsChatLoading] = useState(false)
   const [itineraryVersion, setItineraryVersion] = useState(0)
   const [isPressed, setIsPressed] = useState(false)
+  const [touched, setTouched] = useState<Record<string, boolean>>({})
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const [previousItinerary, setPreviousItinerary] = useState<ItineraryDay[] | null>(null)
+  const [previousChatHistory, setPreviousChatHistory] = useState<ChatMessage[] | null>(null)
 
   useEffect(() => {
     if (itinerary) {
@@ -132,9 +136,12 @@ export default function Home() {
     return () => { effect?.destroy() }
   }, [])
 
+  const d = new Date()
+  const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
   const [form, setForm] = useState<FormValues>({
     destination: '',
-    startDate: '',
+    startDate: today,
     endDate: '',
     budget: '',
     travelers: '',
@@ -148,7 +155,11 @@ export default function Home() {
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const { name, value } = e.target
-    setForm(prev => ({ ...prev, [name]: value }))
+    setForm(prev => {
+      const next = { ...prev, [name]: value }
+      if (name === 'startDate' && next.endDate && next.endDate <= value) next.endDate = ''
+      return next
+    })
   }
 
   function toggleInterest(interest: string) {
@@ -169,12 +180,29 @@ export default function Home() {
     }))
   }
 
+  const errors = {
+    destination: !form.destination.trim() ? 'Destination is required' : '',
+    startDate: !form.startDate ? 'Start date is required' : '',
+    endDate: !form.endDate
+      ? 'End date is required'
+      : form.startDate && form.endDate <= form.startDate
+      ? 'End date must be after start date'
+      : '',
+    budget: !form.budget || Number(form.budget) <= 0 ? 'Budget must be greater than 0' : '',
+    travelers: !form.travelers || Number(form.travelers) < 1 ? 'At least 1 traveler is required' : '',
+    interests: form.interests.length === 0 ? 'Select at least one interest' : '',
+  }
+
   async function generateItinerary() {
+    setSubmitAttempted(true)
+    if (Object.values(errors).some(Boolean)) return
     setLoading(true)
     setItinerary(null)
     setError('')
     setChatHistory([])
     setChatInput('')
+    setPreviousItinerary(null)
+    setPreviousChatHistory(null)
 
     try {
       const res = await fetch('/api/plan', {
@@ -193,6 +221,14 @@ export default function Home() {
     }
   }
 
+  function handleUndo() {
+    setItinerary(previousItinerary)
+    setChatHistory(previousChatHistory!)
+    setPreviousItinerary(null)
+    setPreviousChatHistory(null)
+    setItineraryVersion(v => v + 1)
+  }
+
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault()
     await generateItinerary()
@@ -201,6 +237,9 @@ export default function Home() {
   async function sendChatMessage() {
     const message = chatInput.trim()
     if (!message || !itinerary || loading) return
+
+    const snapshotItinerary = itinerary
+    const snapshotChatHistory = chatHistory
 
     setChatInput('')
     setChatHistory(prev => [...prev, { role: 'user', content: message }])
@@ -217,6 +256,8 @@ export default function Home() {
       if (!res.ok) throw new Error('Server error')
       const data = await res.json()
 
+      setPreviousItinerary(snapshotItinerary)
+      setPreviousChatHistory(snapshotChatHistory)
       setItinerary(data.days)
       setItineraryVersion(v => v + 1)
       setChatHistory(prev => [...prev, { role: 'assistant', content: data.reply }])
@@ -284,8 +325,12 @@ export default function Home() {
                 placeholder="e.g. Tokyo"
                 value={form.destination}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                onBlur={() => setTouched(prev => ({ ...prev, destination: true }))}
+                className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.destination || submitAttempted) && errors.destination ? 'border-red-400' : 'border-gray-300'}`}
               />
+              {(touched.destination || submitAttempted) && errors.destination && (
+                <p className="text-red-500 text-xs mt-1">{errors.destination}</p>
+              )}
             </motion.div>
 
             {/* Travel dates */}
@@ -298,10 +343,15 @@ export default function Home() {
                   id="startDate"
                   name="startDate"
                   type="date"
+                  min={today}
                   value={form.startDate}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  onBlur={() => setTouched(prev => ({ ...prev, startDate: true }))}
+                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.startDate || submitAttempted) && errors.startDate ? 'border-red-400' : 'border-gray-300'}`}
                 />
+                {(touched.startDate || submitAttempted) && errors.startDate && (
+                  <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
@@ -311,10 +361,15 @@ export default function Home() {
                   id="endDate"
                   name="endDate"
                   type="date"
+                  min={form.startDate || today}
                   value={form.endDate}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  onBlur={() => setTouched(prev => ({ ...prev, endDate: true }))}
+                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.endDate || submitAttempted) && errors.endDate ? 'border-red-400' : 'border-gray-300'}`}
                 />
+                {(touched.endDate || submitAttempted) && errors.endDate && (
+                  <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>
+                )}
               </div>
             </motion.div>
 
@@ -329,11 +384,16 @@ export default function Home() {
                   name="budget"
                   type="number"
                   min="0"
+                  step="50"
                   placeholder="e.g. 1000"
                   value={form.budget}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  onBlur={() => setTouched(prev => ({ ...prev, budget: true }))}
+                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.budget || submitAttempted) && errors.budget ? 'border-red-400' : 'border-gray-300'}`}
                 />
+                {(touched.budget || submitAttempted) && errors.budget && (
+                  <p className="text-red-500 text-xs mt-1">{errors.budget}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="travelers" className="block text-sm font-medium text-gray-700 mb-1">
@@ -347,8 +407,12 @@ export default function Home() {
                   placeholder="e.g. 2"
                   value={form.travelers}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400"
+                  onBlur={() => setTouched(prev => ({ ...prev, travelers: true }))}
+                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.travelers || submitAttempted) && errors.travelers ? 'border-red-400' : 'border-gray-300'}`}
                 />
+                {(touched.travelers || submitAttempted) && errors.travelers && (
+                  <p className="text-red-500 text-xs mt-1">{errors.travelers}</p>
+                )}
               </div>
             </motion.div>
 
@@ -375,6 +439,9 @@ export default function Home() {
                   </motion.button>
                 ))}
               </div>
+              {submitAttempted && errors.interests && (
+                <p className="text-red-500 text-xs mt-2">{errors.interests}</p>
+              )}
             </motion.div>
 
             {/* Exploration style */}
@@ -551,7 +618,18 @@ export default function Home() {
 
             {/* ── Chat section ── */}
             <div className="mt-10">
-              <h3 className="text-lg font-semibold text-sky-700 mb-1">Refine Your Itinerary</h3>
+              <div className="flex items-center justify-between mb-1">
+                <h3 className="text-lg font-semibold text-sky-700">Refine Your Itinerary</h3>
+                {previousItinerary && (
+                  <button
+                    onClick={handleUndo}
+                    disabled={loading}
+                    className="text-xs bg-red-700 hover:bg-red-500 text-white disabled:opacity-40 transition-colors px-3 py-1 rounded-full"
+                  >
+                    Undo last change
+                  </button>
+                )}
+              </div>
               <p className="text-sm text-gray-500 mb-4">
                 Want to change it up? — e.g. &ldquo;make day 2 more relaxed&rdquo; or &ldquo;add vegetarian options&rdquo;.
               </p>
