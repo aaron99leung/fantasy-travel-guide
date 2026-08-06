@@ -236,9 +236,9 @@ export default function Home() {
           variants={heroContainer}
           initial="hidden"
           animate="visible"
-          className="text-center max-w-2xl"
+          className="text-left"
         >
-          <motion.h1 variants={heroItem} className="text-6xl text-sky-700 font-bold mb-4">
+          <motion.h1 variants={heroItem} className="text-9xl text-amber-500 mb-4 font-array whitespace-nowrap">
             Fantasy Travel Guide
           </motion.h1>
           <motion.p variants={heroItem} className="text-lg text-gray-600 mb-8">
@@ -382,7 +382,7 @@ export default function Home() {
               <p className="block text-sm font-medium text-gray-700 mb-1">
                 Exploration Style
               </p>
-              <p className="text-xs text-gray-400 mb-2">Pick any combination — or leave blank for a balanced mix.</p>
+              <p className="text-xs text-gray-400 mb-2">Pick any combination — or leave blank for a balanced mix</p>
               <div className="flex flex-wrap gap-2">
                 {EXPLORATION_STYLES.map(style => (
                   <motion.button

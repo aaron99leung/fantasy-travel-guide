@@ -11,6 +11,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-satoshi);
   --font-general-sans: var(--font-general-sans);
+  --font-boska: var(--font-boska);
+  --font-array: var(--font-array);
 }
 
 @media (prefers-color-scheme: dark) {

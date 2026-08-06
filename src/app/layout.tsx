@@ -12,6 +12,16 @@ const generalSans = localFont({
   variable: '--font-general-sans',
 })
 
+const boska = localFont({
+  src: '../fonts/Boska_Complete/Fonts/WEB/fonts/Boska-Variable.woff2',
+  variable: '--font-boska',
+})
+
+const array = localFont({
+  src: '../fonts/Array_Complete/Fonts/WEB/fonts/Array-Bold.woff2',
+  variable: '--font-array',
+})
+
 export const metadata: Metadata = {
   title: 'Fantasy Travel Guide',
   description: 'Plan your perfect trip with AI',
@@ -23,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode
 }>) {
   return (
-    <html lang="en" className={`${satoshi.variable} ${generalSans.variable} h-full antialiased`}>
+    <html lang="en" className={`${satoshi.variable} ${generalSans.variable} ${boska.variable} ${array.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
   )
