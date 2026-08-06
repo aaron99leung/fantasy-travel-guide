@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { CloudSun, Sun, MoonStar } from 'lucide-react'
+import * as THREE from 'three'
+import CLOUDS from 'vanta/dist/vanta.clouds.min'
 
 const INTERESTS = ['Food', 'History', 'Nature', 'Nightlife', 'Adventure', 'Relaxation']
 const EXPLORATION_STYLES = ['Iconic Landmarks', 'Local Neighborhoods', 'Hidden Gems', 'Avoid Tourist Traps']
@@ -78,6 +80,7 @@ const rowVariants = {
 export default function Home() {
   const formRef = useRef<HTMLElement>(null)
   const itineraryRef = useRef<HTMLElement>(null)
+  const heroRef = useRef<HTMLElement>(null)
 
   const [loading, setLoading] = useState(false)
   const [itinerary, setItinerary] = useState<ItineraryDay[] | null>(null)
@@ -105,6 +108,28 @@ export default function Home() {
     }, 4000)
     return () => clearInterval(id)
   }, [loading])
+
+  useEffect(() => {
+    let effect: { destroy: () => void } | null = null
+    if (heroRef.current) {
+      effect = CLOUDS({
+        el: heroRef.current,
+        THREE,
+        mouseControls: true,
+        touchControls: true,
+        gyroControls: false,
+        minHeight: 200,
+        minWidth: 200,
+        skyColor: 0x58bfff,
+        cloudColor: 0xbebebe,
+        cloudShadowColor: 0x3e3e59,
+        sunColor: 0xff8e00,
+        sunGlareColor: 0xf7612f,
+        speed: 0.70
+      })
+    }
+    return () => { effect?.destroy() }
+  }, [])
 
   const [form, setForm] = useState<FormValues>({
     destination: '',
@@ -205,7 +230,7 @@ export default function Home() {
   return (
     <main>
       {/* ── Hero section ── */}
-      <section className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-sky-300 to-white px-6">
+      <section ref={heroRef} className="flex min-h-screen flex-col items-center justify-center px-6 relative overflow-hidden">
         <motion.div
           variants={heroContainer}
           initial="hidden"
@@ -213,7 +238,7 @@ export default function Home() {
           className="text-center max-w-2xl"
         >
           <motion.h1 variants={heroItem} className="text-5xl text-sky-700 font-bold mb-4">
-            Fantasy Travell Guide
+            Fantasy Travel Guide
           </motion.h1>
           <motion.p variants={heroItem} className="text-lg text-gray-600 mb-8">
             Tell us where you want to go and we&apos;ll build your perfect itinerary.
