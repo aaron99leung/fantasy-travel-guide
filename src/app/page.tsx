@@ -238,7 +238,7 @@ export default function Home() {
           animate="visible"
           className="text-left"
         >
-          <motion.h1 variants={heroItem} className="text-9xl text-amber-500 mb-4 font-array whitespace-nowrap">
+          <motion.h1 variants={heroItem} className="text-5xl md:text-7xl lg:text-9xl text-amber-500 mb-4 font-array">
             Fantasy Travel Guide
           </motion.h1>
           <motion.p variants={heroItem} className="text-lg text-gray-600 mb-8">
