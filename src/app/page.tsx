@@ -238,11 +238,11 @@ export default function Home() {
           animate="visible"
           className="text-center max-w-2xl"
         >
-          <motion.h1 variants={heroItem} className="text-5xl text-sky-700 font-bold mb-4">
+          <motion.h1 variants={heroItem} className="text-6xl text-sky-700 font-bold mb-4">
             Fantasy Travel Guide
           </motion.h1>
           <motion.p variants={heroItem} className="text-lg text-gray-600 mb-8">
-            Tell us where you want to go and we&apos;ll build your perfect itinerary.
+            Tell us where you want to go and we&apos;ll build your perfect itinerary
           </motion.p>
 
           <motion.div variants={heroItem}>
@@ -268,7 +268,7 @@ export default function Home() {
             Plan Your Trip
           </motion.h2>
           <motion.p {...reveal} transition={{ ...reveal.transition, delay: 0.05 }} className="text-gray-500 text-center mb-10">
-            Fill in the details and we&apos;ll create your perfect itinerary.
+            Fill in the details and we&apos;ll create your perfect itinerary
           </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
