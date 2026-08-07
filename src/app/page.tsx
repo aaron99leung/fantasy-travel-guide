@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
-import { CloudSun, Sun, MoonStar } from 'lucide-react'
+import { CloudSun, Sun, MoonStar, ChevronDown } from 'lucide-react'
 import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
 import MagneticCarousel from '@/components/MagneticCarousel'
 import * as THREE from 'three'
@@ -98,12 +98,27 @@ export default function Home() {
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const [previousItinerary, setPreviousItinerary] = useState<ItineraryDay[] | null>(null)
   const [previousChatHistory, setPreviousChatHistory] = useState<ChatMessage[] | null>(null)
+  const [expandedDays, setExpandedDays] = useState<Set<number>>(new Set())
 
   useEffect(() => {
     if (itinerary) {
       itineraryRef.current?.scrollIntoView({ behavior: 'smooth' })
+      // For short trips expand all; for 7+ days start collapsed so the list stays scannable
+      const initial = itinerary.length < 7
+        ? new Set(itinerary.map(d => d.day))
+        : new Set<number>()
+      setExpandedDays(initial)
     }
   }, [itinerary])
+
+  function toggleDay(day: number) {
+    setExpandedDays(prev => {
+      const next = new Set(prev)
+      if (next.has(day)) next.delete(day)
+      else next.add(day)
+      return next
+    })
+  }
 
   useEffect(() => {
     if (!loading) {
@@ -508,9 +523,19 @@ export default function Home() {
               <motion.button
                 type="submit"
                 disabled={loading}
+                animate={
+                  loading
+                    ? { backgroundColor: ['#fcd34d', '#f59e0b', '#fcd34d'] }
+                    : { backgroundColor: '#d97706' }
+                }
+                transition={
+                  loading
+                    ? { backgroundColor: { duration: 1.5, repeat: Infinity, ease: 'easeInOut' } }
+                    : { backgroundColor: { duration: 0.3 }, type: 'spring', stiffness: 500, damping: 30 }
+                }
+                whileHover={!loading ? { backgroundColor: '#b45309' } : {}}
                 whileTap={!loading ? { scale: 0.96 } : {}}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                className="w-full bg-amber-600 hover:bg-amber-700 disabled:bg-amber-300 text-white font-semibold py-3 px-8 rounded-full transition-colors"
+                className="w-full text-white font-semibold py-3 px-8 rounded-full"
               >
                 {loading ? 'Building your itinerary…' : 'Build My Itinerary'}
               </motion.button>
@@ -523,7 +548,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="mt-10 flex flex-col items-center gap-3 text-sky-300"
+              className="mt-10 flex flex-col items-center gap-3 text-white"
             >
               <span className="loading loading-spinner loading-xl" />
               <AnimatePresence mode="wait">
@@ -551,9 +576,9 @@ export default function Home() {
 
       {/* ── Itinerary section — one card per day ── */}
       {itinerary && (
-        <section ref={itineraryRef} className="bg-sky-50 px-6 py-20">
+        <section ref={itineraryRef} className="bg-gradient-to-br from-slate-900 via-slate-800 to-indigo-950 px-6 py-20">
           <div className="max-w-2xl mx-auto">
-            <h2 className="text-3xl font-bold text-sky-700 mb-8 text-center">
+            <h2 className="text-3xl font-bold text-white mb-8 text-center">
               Your Itinerary
             </h2>
             <motion.div
@@ -563,50 +588,75 @@ export default function Home() {
               initial="hidden"
               animate="visible"
             >
-              {itinerary.map((day) => (
-                <motion.div
-                  key={day.day}
-                  variants={cardItem}
-                  whileHover={{
-                    y: -5,
-                    boxShadow: '0 16px 36px rgba(0,0,0,0.11)',
-                    transition: { duration: 0.2 },
-                  }}
-                  className="bg-white rounded-2xl shadow-sm overflow-hidden"
-                >
-                  {/* Card header */}
-                  <div className="bg-sky-600 px-6 py-4">
-                    <p className="text-white font-bold text-lg">Day {day.day}</p>
-                    <p className="text-sky-100 text-sm">{formatDate(day.date)}</p>
-                  </div>
+              {itinerary.map((day) => {
+                const isExpanded = expandedDays.has(day.day)
+                return (
                   <motion.div
-                    className="divide-y divide-gray-100"
-                    variants={{
-                      hidden: {},
-                      visible: { transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
-                    }}
+                    key={day.day}
+                    variants={cardItem}
+                    className="bg-slate-800 border border-slate-700 rounded-2xl shadow-lg overflow-hidden"
                   >
-                    {[
-                      { label: 'Morning', content: day.morning, color: 'text-amber-600', Icon: CloudSun },
-                      { label: 'Afternoon', content: day.afternoon, color: 'text-sky-600', Icon: Sun },
-                      { label: 'Evening', content: day.evening, color: 'text-indigo-600', Icon: MoonStar },
-                    ].map(({ label, content, color, Icon }) => (
-                      <motion.div key={label} variants={rowVariants} className="px-6 py-4">
-                        <div className={`flex items-center gap-1.5 mb-1 ${color}`}>
-                          <Icon size={13} strokeWidth={2.5} />
-                          <p className="text-xs font-semibold uppercase tracking-wide">{label}</p>
-                        </div>
-                        <p className="text-gray-700 text-sm leading-relaxed">{content}</p>
+                    {/* Clickable header */}
+                    <button
+                      onClick={() => toggleDay(day.day)}
+                      className="w-full bg-slate-700/50 px-6 py-4 flex items-center justify-between text-left hover:bg-slate-700/70 transition-colors"
+                    >
+                      <div>
+                        <p className="text-white font-bold text-lg">Day {day.day}</p>
+                        <p className="text-slate-400 text-sm">{formatDate(day.date)}</p>
+                      </div>
+                      <motion.div
+                        animate={{ rotate: isExpanded ? 0 : -90 }}
+                        transition={{ duration: 0.2, ease: 'easeInOut' }}
+                      >
+                        <ChevronDown size={18} className="text-slate-400" />
                       </motion.div>
-                    ))}
+                    </button>
+
+                    {/* Collapsible body */}
+                    <AnimatePresence initial={false}>
+                      {isExpanded && (
+                        <motion.div
+                          initial={{ height: 0 }}
+                          animate={{ height: 'auto' }}
+                          exit={{ height: 0 }}
+                          transition={{ duration: 0.25, ease: 'easeInOut' }}
+                          style={{ overflow: 'hidden' }}
+                        >
+                          <motion.div
+                            className="divide-y divide-slate-700"
+                            initial="hidden"
+                            animate="visible"
+                            variants={{
+                              hidden: {},
+                              visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+                            }}
+                          >
+                            {[
+                              { label: 'Morning', content: day.morning, color: 'text-amber-400', Icon: CloudSun },
+                              { label: 'Afternoon', content: day.afternoon, color: 'text-sky-400', Icon: Sun },
+                              { label: 'Evening', content: day.evening, color: 'text-indigo-400', Icon: MoonStar },
+                            ].map(({ label, content, color, Icon }) => (
+                              <motion.div key={label} variants={rowVariants} className="px-6 py-4">
+                                <div className={`flex items-center gap-1.5 mb-1 ${color}`}>
+                                  <Icon size={13} strokeWidth={2.5} />
+                                  <p className="text-xs font-semibold uppercase tracking-wide">{label}</p>
+                                </div>
+                                <p className="text-slate-200 text-sm leading-relaxed">{content}</p>
+                              </motion.div>
+                            ))}
+                          </motion.div>
+                          {/* Estimated daily cost footer */}
+                          <div className="px-6 py-3 bg-slate-900/50 border-t border-slate-700 flex justify-between items-center">
+                            <p className="text-xs font-medium text-slate-400">Estimated daily cost</p>
+                            <p className="text-sm font-semibold text-amber-400">£{day.estimatedCost ?? '—'}</p>
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </motion.div>
-                  {/* Estimated daily cost footer */}
-                  <div className="px-6 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
-                    <p className="text-xs font-medium text-gray-500">Estimated daily cost</p>
-                    <p className="text-sm font-semibold text-amber-600">£{day.estimatedCost ?? '—'}</p>
-                  </div>
-                </motion.div>
-              ))}
+                )
+              })}
             </motion.div>
 
             {/* Budget vs actual summary */}
@@ -615,14 +665,14 @@ export default function Home() {
               const budget = parseInt(form.budget) || 0
               const over = budget > 0 && total > budget
               return (
-                <div className="mt-4 bg-white rounded-2xl shadow-sm p-6">
+                <div className="mt-4 bg-slate-800 border border-slate-700 rounded-2xl shadow-lg p-6">
                   <div className="flex justify-between items-center mb-3">
-                    <p className="text-sm font-semibold text-gray-700">Total estimated cost</p>
-                    <p className={`font-bold text-lg ${over ? 'text-red-500' : 'text-amber-600'}`}>£{total}</p>
+                    <p className="text-sm font-semibold text-slate-200">Total estimated cost</p>
+                    <p className={`font-bold text-lg ${over ? 'text-red-400' : 'text-amber-400'}`}>£{total}</p>
                   </div>
                   {budget > 0 && (
                     <>
-                      <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden mb-1.5">
+                      <div className="w-full bg-slate-700 rounded-full h-2 overflow-hidden mb-1.5">
                         <motion.div
                           className={`h-2 rounded-full ${over ? 'bg-red-400' : 'bg-amber-500'}`}
                           initial={{ width: '0%' }}
@@ -631,7 +681,7 @@ export default function Home() {
                           transition={{ duration: 1.5, ease: 'easeOut' as const, delay: 0.3 }}
                         />
                       </div>
-                      <p className="text-xs text-right text-gray-400">
+                      <p className="text-xs text-right text-white">
                         {over ? `£${total - budget} over` : `£${budget - total} remaining`} from your £{budget} budget
                       </p>
                     </>
@@ -646,7 +696,7 @@ export default function Home() {
               disabled={loading}
               whileTap={{ scale: 1.12 }}
               transition={{ type: 'spring', stiffness: 500, damping: 15 }}
-              className="mt-8 w-full border-2 border-sky-600 text-sky-600 hover:bg-sky-300 disabled:opacity-40 font-semibold py-3 px-8 rounded-full transition-colors"
+              className="mt-8 w-full border-2 border-sky-400 text-sky-400 hover:bg-sky-400 hover:text-white disabled:opacity-40 font-semibold py-3 px-8 rounded-full transition-colors"
             >
               Regenerate Itinerary
             </motion.button>
@@ -654,7 +704,7 @@ export default function Home() {
             {/* ── Chat section ── */}
             <div className="mt-10">
               <div className="flex items-center justify-between mb-1">
-                <h3 className="text-lg font-semibold text-sky-700">Refine Your Itinerary</h3>
+                <h3 className="text-lg font-semibold text-sky-400">Refine Your Itinerary</h3>
                 {previousItinerary && (
                   <button
                     onClick={handleUndo}
@@ -665,7 +715,7 @@ export default function Home() {
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-500 mb-4">
+              <p className="text-sm text-slate-400 mb-4">
                 Want to change it up? — e.g. &ldquo;make day 2 more relaxed&rdquo; or &ldquo;add vegetarian options&rdquo;.
               </p>
 
@@ -730,7 +780,7 @@ export default function Home() {
                   onKeyDown={e => { if (e.key === 'Enter') sendChatMessage() }}
                   placeholder='e.g. "make day 2 more relaxed"'
                   disabled={loading}
-                  className="flex-1 border border-gray-300 rounded-lg px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 disabled:bg-gray-50"
+                  className="flex-1 border border-slate-600 bg-slate-800 rounded-lg px-4 py-2.5 text-sm text-gray-200 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 disabled:bg-slate-900"
                 />
                 <button
                   onClick={sendChatMessage}
@@ -744,6 +794,35 @@ export default function Home() {
           </div>
         </section>
       )}
+      <footer className="bg-black text-gray-400 py-6 px-6">
+        <div className="max-w-2xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3 text-sm">
+          <span className="text-gray-300 font-medium">Aaron Leung</span>
+          <div className="flex items-center gap-5">
+            <a
+              href="https://github.com/aaron99leung/fantasy-travel-guide"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-white transition-colors"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                <path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61-.546-1.385-1.335-1.755-1.335-1.755-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12z"/>
+              </svg>
+              GitHub
+            </a>
+            <a
+              href="https://www.linkedin.com/in/aaronleungkachun/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 hover:text-white transition-colors"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+                <path d="M20.447 20.452H16.89v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a1.98 1.98 0 01-1.979-1.98 1.98 1.98 0 011.979-1.98 1.98 1.98 0 011.979 1.98 1.98 1.98 0 01-1.979 1.98zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+              </svg>
+              LinkedIn
+            </a>
+          </div>
+        </div>
+      </footer>
     </main>
   )
 }
