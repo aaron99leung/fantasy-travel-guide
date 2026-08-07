@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { motion, useMotionValue, useSpring } from 'motion/react'
 
 export interface CarouselImage {
   src: string
@@ -170,6 +171,38 @@ export default function MagneticCarousel({
     setOpen(null)
   }
 
+  // 3D tilt for the open card
+  const rawX = useMotionValue(0)
+  const rawY = useMotionValue(0)
+  const tiltX = useSpring(rawX, { stiffness: 260, damping: 28 })
+  const tiltY = useSpring(rawY, { stiffness: 260, damping: 28 })
+
+  useEffect(() => {
+    if (open === null) { rawX.set(0); rawY.set(0) }
+  }, [open])
+
+  function handleTiltMove(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const cx = (e.clientX - rect.left) / rect.width   // 0 → 1
+    const cy = (e.clientY - rect.top) / rect.height    // 0 → 1
+    rawY.set((cx - 0.5) * 20)   // left → negative, right → positive
+    rawX.set(-(cy - 0.5) * 20)  // top → positive, bottom → negative
+  }
+
+  function handleTiltLeave() {
+    rawX.set(0)
+    rawY.set(0)
+  }
+
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    setIsMobile(mq.matches)
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
   function sizeFor(i: number) {
     if (open !== null) {
       return i === open
@@ -185,6 +218,101 @@ export default function MagneticCarousel({
 
   const barTransition = open !== null || closing ? OPEN_TRANSITION : 'none'
 
+  // ── Mobile: horizontal swipe row ──────────────────────────────────────────
+  if (isMobile) {
+    return (
+      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap,
+            overflowX: 'auto',
+            overflowY: 'hidden',
+            width: '100%',
+            padding: '12px 24px',
+            boxSizing: 'border-box',
+            scrollSnapType: 'x mandatory',
+            WebkitOverflowScrolling: 'touch',
+            scrollbarWidth: 'none',
+          } as React.CSSProperties}
+        >
+          {images.map((img, i) => {
+            const isOpen = open === i
+            return (
+              <div
+                key={i}
+                onClick={() => { if (isOpen) close(); else setOpen(i) }}
+                style={{
+                  flex: 'none',
+                  width: 180,
+                  height: 300,
+                  borderRadius: 14,
+                  backgroundImage: `url(${img.src})`,
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                  position: 'relative',
+                  cursor: 'pointer',
+                  scrollSnapAlign: 'start',
+                  boxShadow: isOpen
+                    ? '0 8px 28px rgba(0,0,0,0.45)'
+                    : '0 4px 16px rgba(0,0,0,0.2)',
+                  transition: `box-shadow ${DUR}s ${EASE}`,
+                  outline: isOpen ? '2px solid rgba(255,255,255,0.5)' : '2px solid transparent',
+                }}
+              >
+                {/* Always-visible gradient + label; description fades in on tap */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    padding: '36px 12px 12px',
+                    background: 'linear-gradient(to top, rgba(0,0,0,0.78) 0%, transparent 100%)',
+                    borderRadius: '0 0 14px 14px',
+                  }}
+                >
+                  <span
+                    style={{
+                      display: 'block',
+                      color: 'white',
+                      fontWeight: 600,
+                      fontSize: 14,
+                      letterSpacing: '0.02em',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.5)',
+                    }}
+                  >
+                    {img.label}
+                  </span>
+                  {img.description && (
+                    <span
+                      style={{
+                        display: 'block',
+                        color: 'rgba(255,255,255,0.9)',
+                        fontSize: 12,
+                        lineHeight: 1.5,
+                        textShadow: '0 1px 3px rgba(0,0,0,0.4)',
+                        overflow: 'hidden',
+                        maxHeight: isOpen ? '120px' : '0px',
+                        marginTop: isOpen ? 5 : 0,
+                        opacity: isOpen ? 1 : 0,
+                        transition: `opacity ${DUR}s ${EASE}, max-height ${DUR}s ${EASE}, margin-top ${DUR}s ${EASE}`,
+                      }}
+                    >
+                      {img.description}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    )
+  }
+
+  // ── Desktop: magnetic hover layout ────────────────────────────────────────
   return (
     <div
       ref={containerRef}
@@ -218,13 +346,15 @@ export default function MagneticCarousel({
         const blurred = open !== null && !isOpen
 
         return (
-          <div
+          <motion.div
             key={i}
             onClick={(e) => {
               e.stopPropagation()
               if (isOpen) close()
               else setOpen(i)
             }}
+            onMouseMove={isOpen ? handleTiltMove : undefined}
+            onMouseLeave={isOpen ? handleTiltLeave : undefined}
             style={{
               flex: 'none',
               width,
@@ -245,6 +375,9 @@ export default function MagneticCarousel({
               boxShadow: isOpen
                 ? '0 20px 60px rgba(0,0,0,0.35)'
                 : '0 4px 16px rgba(0,0,0,0.18)',
+              transformPerspective: 900,
+              rotateX: isOpen ? tiltX : 0,
+              rotateY: isOpen ? tiltY : 0,
             }}
           >
             {/* Caption gradient overlay */}
@@ -293,7 +426,7 @@ export default function MagneticCarousel({
                 </span>
               )}
             </div>
-          </div>
+          </motion.div>
         )
       })}
     </div>
