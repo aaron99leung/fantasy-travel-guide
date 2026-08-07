@@ -279,7 +279,7 @@ export default function Home() {
           animate="visible"
           className="text-left"
         >
-          <motion.h1 variants={heroItem} className="text-5xl md:text-7xl lg:text-9xl text-amber-500 mb-4 font-array">
+          <motion.h1 variants={heroItem} className="text-5xl sm:text-6xl md:text-7xl lg:text-9xl text-amber-500 mb-4 font-array">
             Fantasy Travel Guide
           </motion.h1>
           <motion.p variants={heroItem} className="text-lg text-gray-600 mb-8">
@@ -334,7 +334,7 @@ export default function Home() {
             </motion.div>
 
             {/* Travel dates */}
-            <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.15 }} className="grid grid-cols-2 gap-4">
+            <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.15 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
                   Start Date
@@ -374,7 +374,7 @@ export default function Home() {
             </motion.div>
 
             {/* Budget and travelers */}
-            <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.2 }} className="grid grid-cols-2 gap-4">
+            <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.2 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
                   Budget (£)
