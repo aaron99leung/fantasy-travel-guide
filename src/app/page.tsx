@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
 import { CloudSun, Sun, MoonStar } from 'lucide-react'
+import { GlassCard, GlassCardContent } from '@/components/ui/glass-card'
+import MagneticCarousel from '@/components/MagneticCarousel'
 import * as THREE from 'three'
 import CLOUDS from 'vanta/dist/vanta.clouds.min'
 
@@ -302,20 +304,36 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ── Planner form section ── */}
-      <section ref={formRef} className="min-h-screen bg-white px-6 py-20">
-        <div className="max-w-2xl mx-auto">
+      {/* ── Destinations showcase section ── */}
+      <section className="bg-white py-16 overflow-hidden">
+        <div className="max-w-6xl mx-auto px-6 mb-10">
           <motion.h2 {...reveal} className="text-3xl font-bold text-sky-700 mb-2 text-center">
+            Haven&apos;t decided where to go yet?
+          </motion.h2>
+          <motion.p {...reveal} transition={{ ...reveal.transition, delay: 0.05 }} className="text-gray-500 text-center">
+            Here are some popular destinations to inspire your next adventure
+          </motion.p>
+        </div>
+        <div style={{ height: 420 }} className="w-full">
+          <MagneticCarousel />
+        </div>
+      </section>
+
+      {/* ── Planner form section ── */}
+      <section ref={formRef} className="min-h-screen bg-[url('/images/canyon.jpg')] bg-cover bg-center px-6 py-20 flex items-center justify-center">
+        <GlassCard className="max-w-2xl mx-auto">
+        <GlassCardContent className="px-6 pb-6">
+          <motion.h2 {...reveal} className="text-3xl font-bold text-white mb-2 text-center">
             Plan Your Trip
           </motion.h2>
-          <motion.p {...reveal} transition={{ ...reveal.transition, delay: 0.05 }} className="text-gray-500 text-center mb-10">
+          <motion.p {...reveal} transition={{ ...reveal.transition, delay: 0.05 }} className="text-gray-300 text-center mb-10">
             Fill in the details and we&apos;ll create your perfect itinerary
           </motion.p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Destination */}
             <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.1 }}>
-              <label htmlFor="destination" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="destination" className="block text-sm font-medium text-gray-200 mb-1">
                 Destination
               </label>
               <input
@@ -326,7 +344,7 @@ export default function Home() {
                 value={form.destination}
                 onChange={handleChange}
                 onBlur={() => setTouched(prev => ({ ...prev, destination: true }))}
-                className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.destination || submitAttempted) && errors.destination ? 'border-red-400' : 'border-gray-300'}`}
+                className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 bg-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.destination || submitAttempted) && errors.destination ? 'border-red-400' : 'border-white/30'}`}
               />
               {(touched.destination || submitAttempted) && errors.destination && (
                 <p className="text-red-500 text-xs mt-1">{errors.destination}</p>
@@ -336,7 +354,7 @@ export default function Home() {
             {/* Travel dates */}
             <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.15 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="startDate" className="block text-sm font-medium text-gray-200 mb-1">
                   Start Date
                 </label>
                 <input
@@ -347,14 +365,14 @@ export default function Home() {
                   value={form.startDate}
                   onChange={handleChange}
                   onBlur={() => setTouched(prev => ({ ...prev, startDate: true }))}
-                  className={`w-full border rounded-lg px-2 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.startDate || submitAttempted) && errors.startDate ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-2 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.startDate || submitAttempted) && errors.startDate ? 'border-red-400' : 'border-white/30'}`}
                 />
                 {(touched.startDate || submitAttempted) && errors.startDate && (
                   <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>
                 )}
               </div>
               <div>
-                <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="endDate" className="block text-sm font-medium text-gray-200 mb-1">
                   End Date
                 </label>
                 <input
@@ -365,7 +383,7 @@ export default function Home() {
                   value={form.endDate}
                   onChange={handleChange}
                   onBlur={() => setTouched(prev => ({ ...prev, endDate: true }))}
-                  className={`w-full border rounded-lg px-2 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.endDate || submitAttempted) && errors.endDate ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-2 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base bg-white/10 text-white focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.endDate || submitAttempted) && errors.endDate ? 'border-red-400' : 'border-white/30'}`}
                 />
                 {(touched.endDate || submitAttempted) && errors.endDate && (
                   <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>
@@ -376,7 +394,7 @@ export default function Home() {
             {/* Budget and travelers */}
             <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.2 }} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label htmlFor="budget" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="budget" className="block text-sm font-medium text-gray-200 mb-1">
                   Budget (£)
                 </label>
                 <input
@@ -389,14 +407,14 @@ export default function Home() {
                   value={form.budget}
                   onChange={handleChange}
                   onBlur={() => setTouched(prev => ({ ...prev, budget: true }))}
-                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.budget || submitAttempted) && errors.budget ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-4 py-2.5 bg-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.budget || submitAttempted) && errors.budget ? 'border-red-400' : 'border-white/30'}`}
                 />
                 {(touched.budget || submitAttempted) && errors.budget && (
                   <p className="text-red-500 text-xs mt-1">{errors.budget}</p>
                 )}
               </div>
               <div>
-                <label htmlFor="travelers" className="block text-sm font-medium text-gray-700 mb-1">
+                <label htmlFor="travelers" className="block text-sm font-medium text-gray-200 mb-1">
                   Number of Travelers
                 </label>
                 <input
@@ -408,7 +426,7 @@ export default function Home() {
                   value={form.travelers}
                   onChange={handleChange}
                   onBlur={() => setTouched(prev => ({ ...prev, travelers: true }))}
-                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.travelers || submitAttempted) && errors.travelers ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-4 py-2.5 bg-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.travelers || submitAttempted) && errors.travelers ? 'border-red-400' : 'border-white/30'}`}
                 />
                 {(touched.travelers || submitAttempted) && errors.travelers && (
                   <p className="text-red-500 text-xs mt-1">{errors.travelers}</p>
@@ -418,7 +436,7 @@ export default function Home() {
 
             {/* Interests */}
             <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.25 }}>
-              <p className="block text-sm font-medium text-gray-700 mb-2">
+              <p className="block text-sm font-medium text-gray-200 mb-2">
                 Interests
               </p>
               <div className="flex flex-wrap gap-2">
@@ -432,7 +450,7 @@ export default function Home() {
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                       form.interests.includes(interest)
                         ? 'bg-sky-600 text-white border-sky-600'
-                        : 'bg-white text-gray-600 border-gray-300 hover:border-sky-400'
+                        : 'bg-white/10 text-gray-200 border-white/30 hover:border-sky-400'
                     }`}
                   >
                     {interest}
@@ -446,10 +464,10 @@ export default function Home() {
 
             {/* Exploration style */}
             <motion.div {...reveal} transition={{ ...reveal.transition, delay: 0.3 }}>
-              <p className="block text-sm font-medium text-gray-700 mb-1">
+              <p className="block text-sm font-medium text-gray-200 mb-1">
                 Exploration Style
               </p>
-              <p className="text-xs text-gray-400 mb-2">Pick any combination — or leave blank for a balanced mix</p>
+              <p className="text-xs text-gray-300 mb-2">Pick any combination — or leave blank for a balanced mix (optional)</p>
               <div className="flex flex-wrap gap-2">
                 {EXPLORATION_STYLES.map(style => (
                   <motion.button
@@ -461,7 +479,7 @@ export default function Home() {
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
                       form.explorationStyle.includes(style)
                         ? 'bg-sky-600 text-white border-sky-600'
-                        : 'bg-white text-gray-600 border-gray-300 hover:border-sky-400'
+                        : 'bg-white/10 text-gray-200 border-white/30 hover:border-sky-400'
                     }`}
                   >
                     {style}
@@ -489,7 +507,7 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.85 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.3 }}
-              className="mt-10 flex flex-col items-center gap-3 text-sky-600"
+              className="mt-10 flex flex-col items-center gap-3 text-sky-300"
             >
               <span className="loading loading-spinner loading-xl" />
               <AnimatePresence mode="wait">
@@ -511,7 +529,8 @@ export default function Home() {
           {error && (
             <p className="mt-6 text-center text-red-500 text-sm">{error}</p>
           )}
-        </div>
+        </GlassCardContent>
+        </GlassCard>
       </section>
 
       {/* ── Itinerary section — one card per day ── */}
