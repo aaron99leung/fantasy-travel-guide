@@ -347,7 +347,7 @@ export default function Home() {
                   value={form.startDate}
                   onChange={handleChange}
                   onBlur={() => setTouched(prev => ({ ...prev, startDate: true }))}
-                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.startDate || submitAttempted) && errors.startDate ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-2 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.startDate || submitAttempted) && errors.startDate ? 'border-red-400' : 'border-gray-300'}`}
                 />
                 {(touched.startDate || submitAttempted) && errors.startDate && (
                   <p className="text-red-500 text-xs mt-1">{errors.startDate}</p>
@@ -365,7 +365,7 @@ export default function Home() {
                   value={form.endDate}
                   onChange={handleChange}
                   onBlur={() => setTouched(prev => ({ ...prev, endDate: true }))}
-                  className={`w-full border rounded-lg px-4 py-2.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.endDate || submitAttempted) && errors.endDate ? 'border-red-400' : 'border-gray-300'}`}
+                  className={`w-full border rounded-lg px-2 py-2 sm:px-4 sm:py-2.5 text-sm sm:text-base text-gray-800 focus:outline-none focus:ring-2 focus:ring-sky-400 ${(touched.endDate || submitAttempted) && errors.endDate ? 'border-red-400' : 'border-gray-300'}`}
                 />
                 {(touched.endDate || submitAttempted) && errors.endDate && (
                   <p className="text-red-500 text-xs mt-1">{errors.endDate}</p>
