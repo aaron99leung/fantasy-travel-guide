@@ -83,6 +83,7 @@ export default function Home() {
   const formRef = useRef<HTMLElement>(null)
   const itineraryRef = useRef<HTMLElement>(null)
   const heroRef = useRef<HTMLElement>(null)
+  const showcaseRef = useRef<HTMLElement>(null)
 
   const [loading, setLoading] = useState(false)
   const [itinerary, setItinerary] = useState<ItineraryDay[] | null>(null)
@@ -153,6 +154,10 @@ export default function Home() {
 
   function scrollToForm() {
     formRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  function scrollToShowcase() {
+    showcaseRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -288,7 +293,18 @@ export default function Home() {
             Tell us where you want to go and we&apos;ll build your perfect itinerary
           </motion.p>
 
-          <motion.div variants={heroItem}>
+          <motion.div variants={heroItem} className="flex gap-4">
+            <motion.button
+              onClick={scrollToShowcase}
+              onTapStart={() => setIsPressed(true)}
+              onTap={() => setIsPressed(false)}
+              onTapCancel={() => setIsPressed(false)}
+              animate={isPressed ? { y: 0, scale: 0.95 } : { y: [0, -6, 0], scale: 1}}
+              transition={isPressed ? { duration: 0.2 } : { y: { repeat: Infinity , duration: 2.5, ease: 'easeInOut' }}}
+              className="bg-sky-900 hover:bg-sky-600 text-white font-semibold py-3 px-8 rounded-full transition-colors"
+            >
+              Explore Destinations
+            </motion.button>
             <motion.button
               onClick={scrollToForm}
               onTapStart={() => setIsPressed(true)}
@@ -296,7 +312,7 @@ export default function Home() {
               onTapCancel={() => setIsPressed(false)}
               animate={isPressed ? { y: 0, scale: 0.95 } : { y: [0, -6, 0], scale: 1}}
               transition={isPressed ? { duration: 0.2 } : { y: { repeat: Infinity , duration: 2.5, ease: 'easeInOut' }}}
-              className="bg-sky-600 hover:bg-amber-600 text-white font-semibold py-3 px-8 rounded-full transition-colors"
+              className="bg-amber-600 hover:bg-amber-500 text-white font-semibold py-3 px-8 rounded-full transition-colors"
             >
               Start Planning
             </motion.button>
@@ -305,16 +321,16 @@ export default function Home() {
       </section>
 
       {/* ── Destinations showcase section ── */}
-      <section className="bg-white py-16 overflow-hidden">
+      <section ref={showcaseRef} className="bg-slate-900 py-16 overflow-hidden">
         <div className="max-w-6xl mx-auto px-6 mb-10">
-          <motion.h2 {...reveal} className="text-3xl font-bold text-sky-700 mb-2 text-center">
+          <motion.h2 {...reveal} className="text-3xl font-bold text-white mb-2 text-center">
             Haven&apos;t decided where to go yet?
           </motion.h2>
-          <motion.p {...reveal} transition={{ ...reveal.transition, delay: 0.05 }} className="text-gray-500 text-center">
-            Here are some popular destinations to inspire your next adventure
+          <motion.p {...reveal} transition={{ ...reveal.transition, delay: 0.05 }} className="text-slate-400 text-center">
+            Here are some destinations to inspire your next adventure
           </motion.p>
         </div>
-        <div style={{ height: 420 }} className="w-full">
+        <div style={{ height: 560 }} className="w-full">
           <MagneticCarousel />
         </div>
       </section>

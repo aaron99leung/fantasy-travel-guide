@@ -22,39 +22,54 @@ interface Props {
 
 const DEFAULT_IMAGES: CarouselImage[] = [
   {
-    src: 'https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/612d1402-0ad9-4135-3bbc-a30a6a252b00/w=800',
-    label: 'Tokyo',
-    description: 'A city where ancient temples meet neon-lit streets — endlessly energetic, endlessly surprising.',
+    src: '/images/marrakech.jpg',
+    label: 'Marrakech',
+    description: 'A labyrinth of souks, spice stalls, and rooftop terraces - Morocco\'s most intoxicating city',
   },
   {
-    src: 'https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/6d2ad64a-102d-4eab-0efe-31479e34b500/w=800',
-    label: 'Bali',
-    description: 'Terraced rice fields, sacred temples, and surf breaks — Indonesia\'s island of the gods.',
+    src: '/images/bukchon.jpg',
+    label: 'Seoul',
+    description: 'A living hanok village nestled between Seoul\'s palaces, where traditional Korea breathes on the streets of a modern metropolis',
   },
   {
-    src: 'https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/be854dd1-37aa-4fc7-f569-fdb948109300/w=800',
-    label: 'Paris',
-    description: 'The city of light, love, and impossibly good pastries. Every arrondissement tells a story.',
+    src: '/images/fukuoka.jpg',
+    label: 'Fukuoka',
+    description: 'Japan\'s most liveable city - famous for ramen, yatai street stalls, and a relaxed coastal energy',
   },
   {
-    src: 'https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/51984031-9176-484b-f5e0-4af9a8e9ed00/w=800',
-    label: 'New York',
-    description: 'Five boroughs, infinite neighbourhoods. The city that never sleeps and never runs out of things to do.',
+    src: '/images/lauterbrunnen.jpg',
+    label: 'Lauterbrunnen',
+    description: 'Seventy-two waterfalls pour down sheer cliffs into a valley the Swiss Alps seem to have built for dreams',
   },
   {
-    src: 'https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/34ce1842-4b7a-4d52-0302-38582c341700/w=800',
-    label: 'Santorini',
-    description: 'Whitewashed cliffs tumbling into a caldera, and sunsets that stop conversation mid-sentence.',
+    src: '/images/milos.jpg',
+    label: 'Milos',
+    description: 'Volcanic rock formations, chalky white villages, and some of the Aegean\'s most striking beaches',
   },
   {
-    src: 'https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/88369c6d-00cc-4ac9-74ca-0f0965e06300/w=800',
-    label: 'Kyoto',
-    description: 'Geisha districts, bamboo forests, and thousands of torii gates — Japan\'s cultural soul.',
+    src: '/images/canyon.jpg',
+    label: 'Grand Canyon',
+    description: 'Vast carved walls of sandstone and silence - one of nature\'s most humbling landscapes',
   },
   {
-    src: 'https://imagedelivery.net/IEUjvl3YUlxY-MrTpOAWDQ/aeaa0756-9647-4f6c-d900-204bd25e4a00/w=800',
-    label: 'Maldives',
-    description: 'Overwater bungalows, glass-clear lagoons, and coral reefs teeming with colour.',
+    src: '/images/hong-kong.jpg',
+    label: 'Hong Kong',
+    description: 'A vertical city of dizzying skylines, dim sum mornings, and harbour lights that never dim',
+  },
+  {
+    src: '/images/lapland.jpg',
+    label: 'Lapland',
+    description: 'Aurora-lit skies, frozen lakes, and reindeer trails through the world\'s quietest wilderness',
+  },
+  {
+    src: '/images/portofino.jpg',
+    label: 'Portofino',
+    description: 'Pastel-coloured houses, bobbing yachts, and the unhurried pace of the Italian Riviera at its finest',
+  },
+  {
+    src: '/images/siargao.jpg',
+    label: 'Siargao',
+    description: 'The surfing capital of the Philippines - coconut palms, cloud 9 breaks, and island-hopping by bangka',
   },
 ]
 
@@ -64,11 +79,11 @@ const OPEN_TRANSITION = `width ${DUR}s ${EASE}, height ${DUR}s ${EASE}, filter $
 
 export default function MagneticCarousel({
   images = DEFAULT_IMAGES,
-  collapsedWidth = 80,
-  hoverWidth = 180,
-  collapsedHeight = 320,
-  hoverHeight = 380,
-  openSize = 500,
+  collapsedWidth = 100,
+  hoverWidth = 240,
+  collapsedHeight = 420,
+  hoverHeight = 520,
+  openSize = 620,
   gap = 12,
   influence = 180,
   blur = 2,
