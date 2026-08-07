@@ -2,7 +2,7 @@
 
 An AI-powered travel planner that generates personalised day-by-day itineraries and lets you refine them through natural conversation.
 
-**[🔗 Live Demo](https://fantasy-travel-guide.vercel.app/)**
+**<a href="https://fantasy-travel-guide.vercel.app/" target="_blank">🔗 Live Demo</a>**
 
 ---
 
