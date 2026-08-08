@@ -84,6 +84,7 @@ export default function Home() {
   const itineraryRef = useRef<HTMLElement>(null)
   const heroRef = useRef<HTMLElement>(null)
   const showcaseRef = useRef<HTMLElement>(null)
+  const isChatUpdateRef = useRef(false)
 
   const [loading, setLoading] = useState(false)
   const [itinerary, setItinerary] = useState<ItineraryDay[] | null>(null)
@@ -103,11 +104,13 @@ export default function Home() {
   useEffect(() => {
     if (itinerary) {
       itineraryRef.current?.scrollIntoView({ behavior: 'smooth' })
-      // For short trips expand all; for 7+ days start collapsed so the list stays scannable
-      const initial = itinerary.length < 7
-        ? new Set(itinerary.map(d => d.day))
-        : new Set<number>()
-      setExpandedDays(initial)
+      if (!isChatUpdateRef.current) {
+        const initial = itinerary.length < 7
+          ? new Set(itinerary.map(d => d.day))
+          : new Set<number>()
+        setExpandedDays(initial)
+      }
+      isChatUpdateRef.current = false
     }
   }, [itinerary])
 
@@ -280,6 +283,18 @@ export default function Home() {
 
       setPreviousItinerary(snapshotItinerary)
       setPreviousChatHistory(snapshotChatHistory)
+      const changedDayNums = (data.days as ItineraryDay[])
+        .filter(newDay => {
+          const old = snapshotItinerary.find(d => d.day === newDay.day)
+          return !old
+            || old.morning !== newDay.morning
+            || old.afternoon !== newDay.afternoon
+            || old.evening !== newDay.evening
+            || old.estimatedCost !== newDay.estimatedCost
+        })
+        .map(d => d.day)
+      isChatUpdateRef.current = true
+      setExpandedDays(new Set(changedDayNums))
       setItinerary(data.days)
       setItineraryVersion(v => v + 1)
       setChatHistory(prev => [...prev, { role: 'assistant', content: data.reply }])
@@ -590,6 +605,14 @@ export default function Home() {
             >
               {itinerary.map((day) => {
                 const isExpanded = expandedDays.has(day.day)
+                const prevDay = previousItinerary?.find(d => d.day === day.day) ?? null
+                const changed = {
+                  morning:       prevDay !== null && prevDay.morning       !== day.morning,
+                  afternoon:     prevDay !== null && prevDay.afternoon     !== day.afternoon,
+                  evening:       prevDay !== null && prevDay.evening       !== day.evening,
+                  estimatedCost: prevDay !== null && prevDay.estimatedCost !== day.estimatedCost,
+                }
+                const anyChanged = Object.values(changed).some(Boolean)
                 return (
                   <motion.div
                     key={day.day}
@@ -601,9 +624,16 @@ export default function Home() {
                       onClick={() => toggleDay(day.day)}
                       className="w-full bg-slate-700/50 px-6 py-4 flex items-center justify-between text-left hover:bg-slate-700/70 transition-colors"
                     >
-                      <div>
-                        <p className="text-white font-bold text-lg">Day {day.day}</p>
-                        <p className="text-slate-400 text-sm">{formatDate(day.date)}</p>
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <p className="text-white font-bold text-lg">Day {day.day}</p>
+                          <p className="text-slate-400 text-sm">{formatDate(day.date)}</p>
+                        </div>
+                        {anyChanged && (
+                          <span className="text-xs font-semibold text-sky-400 bg-sky-400/10 border border-sky-400/30 px-2 py-0.5 rounded-full">
+                            Updated
+                          </span>
+                        )}
                       </div>
                       <motion.div
                         animate={{ rotate: isExpanded ? 0 : -90 }}
@@ -633,23 +663,23 @@ export default function Home() {
                             }}
                           >
                             {[
-                              { label: 'Morning', content: day.morning, color: 'text-amber-400', Icon: CloudSun },
-                              { label: 'Afternoon', content: day.afternoon, color: 'text-sky-400', Icon: Sun },
-                              { label: 'Evening', content: day.evening, color: 'text-indigo-400', Icon: MoonStar },
-                            ].map(({ label, content, color, Icon }) => (
+                              { label: 'Morning',   content: day.morning,   color: 'text-amber-400', Icon: CloudSun, key: 'morning'   as const },
+                              { label: 'Afternoon', content: day.afternoon, color: 'text-sky-400',   Icon: Sun,      key: 'afternoon' as const },
+                              { label: 'Evening',   content: day.evening,   color: 'text-indigo-400',Icon: MoonStar, key: 'evening'   as const },
+                            ].map(({ label, content, color, Icon, key }) => (
                               <motion.div key={label} variants={rowVariants} className="px-6 py-4">
                                 <div className={`flex items-center gap-1.5 mb-1 ${color}`}>
                                   <Icon size={13} strokeWidth={2.5} />
                                   <p className="text-xs font-semibold uppercase tracking-wide">{label}</p>
                                 </div>
-                                <p className="text-slate-200 text-sm leading-relaxed">{content}</p>
+                                <p className={`text-sm leading-relaxed ${changed[key] ? 'text-white font-bold' : 'text-slate-200'}`}>{content}</p>
                               </motion.div>
                             ))}
                           </motion.div>
                           {/* Estimated daily cost footer */}
                           <div className="px-6 py-3 bg-slate-900/50 border-t border-slate-700 flex justify-between items-center">
                             <p className="text-xs font-medium text-slate-400">Estimated daily cost</p>
-                            <p className="text-sm font-semibold text-amber-400">£{day.estimatedCost ?? '—'}</p>
+                            <p className={`text-sm text-amber-400 ${changed.estimatedCost ? 'font-extrabold' : 'font-semibold'}`}>£{day.estimatedCost ?? '—'}</p>
                           </div>
                         </motion.div>
                       )}

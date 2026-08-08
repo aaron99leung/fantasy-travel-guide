@@ -93,6 +93,7 @@ export default function MagneticCarousel({
   const [factors, setFactors] = useState<number[]>(() => images.map(() => 0))
   const [open, setOpen] = useState<number | null>(null)
   const [closing, setClosing] = useState(false)
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const targetRef = useRef<number[]>(images.map(() => 0))
   const curRef = useRef<number[]>(images.map(() => 0))
@@ -156,6 +157,7 @@ export default function MagneticCarousel({
   }
 
   function onLeave() {
+    setHoveredIndex(null)
     if (open !== null) return
     targetRef.current = images.map(() => 0)
     startLoop()
@@ -353,8 +355,9 @@ export default function MagneticCarousel({
               if (isOpen) close()
               else setOpen(i)
             }}
+            onMouseEnter={() => setHoveredIndex(i)}
             onMouseMove={isOpen ? handleTiltMove : undefined}
-            onMouseLeave={isOpen ? handleTiltLeave : undefined}
+            onMouseLeave={() => { setHoveredIndex(null); if (isOpen) handleTiltLeave() }}
             style={{
               flex: 'none',
               width,
@@ -380,7 +383,36 @@ export default function MagneticCarousel({
               rotateY: isOpen ? tiltY : 0,
             }}
           >
-            {/* Caption gradient overlay */}
+            {/* Hover label — centered, quick linear fade, hidden when a card is open */}
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.38))',
+                opacity: open === null && hoveredIndex === i ? 1 : 0,
+                transition: 'opacity 0.15s linear',
+                pointerEvents: 'none',
+              }}
+            >
+              <span
+                style={{
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: 13,
+                  letterSpacing: '0.04em',
+                  textAlign: 'center',
+                  textShadow: '0 1px 6px rgba(0,0,0,0.7)',
+                  padding: '0 8px',
+                }}
+              >
+                {img.label}
+              </span>
+            </div>
+
+            {/* Open caption — bottom position, unchanged */}
             <div
               style={{
                 position: 'absolute',
@@ -390,7 +422,8 @@ export default function MagneticCarousel({
                 padding: isOpen ? '40px 18px 18px' : '28px 8px 10px',
                 background: 'linear-gradient(to top, rgba(0,0,0,0.72) 0%, transparent 100%)',
                 opacity: isOpen ? 1 : 0,
-                transition: `opacity ${DUR}s ${EASE}, padding ${DUR}s ${EASE}`,
+                transition: `opacity 0.8s ease, padding ${DUR}s ${EASE}`,
+                pointerEvents: 'none',
               }}
             >
               <span
@@ -419,7 +452,7 @@ export default function MagneticCarousel({
                     marginTop: 8,
                     textShadow: '0 1px 3px rgba(0,0,0,0.4)',
                     opacity: isOpen ? 1 : 0,
-                    transition: `opacity ${DUR}s ${EASE} ${isOpen ? DUR * 0.6 : 0}s`,
+                    transition: `opacity 0.6s ease ${isOpen ? '0.25s' : '0s'}`,
                   }}
                 >
                   {img.description}
