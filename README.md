@@ -43,6 +43,9 @@ Each chat message appends to a `ChatMessage[]` array that is sent back to the AP
 **Vanta.js Three.js version pin**\
 Vanta CLOUDS depends on Three.js internals that changed in r155 (`ColorManagement.enabled` became opt-out). The project pins `three@^0.134.0` to maintain correct cloud colours. If WebGL is unavailable the `useEffect` that mounts Vanta simply does not fire, and the hero section falls back cleanly to its CSS background.
 
+**Diagnosing a dev-server-only mobile rendering issue**\
+Mobile testing showed a black-then-white screen with unresponsive UI, initially suspected to be a WebGL/Vanta failure on mobile GPUs. Using Safari's remote Web Inspector and cross-device testing (reproducing the same failure on a MacBook via network IP), the actual cause was isolated to Next.js's dev-server Hot Module Replacement WebSocket failing over non-localhost connections — not an application bug. Confirmed resolved via a production build (`npm run build && npm run start`).
+
 ---
 
 ## Local Setup
