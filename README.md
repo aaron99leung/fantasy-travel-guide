@@ -4,6 +4,8 @@ An AI-powered travel planner that generates personalised day-by-day itineraries 
 
 **[🔗 Live Demo](https://fantasy-travel-guide.vercel.app/)**
 
+![Hero preview](public/screenshots/hero.gif)
+
 ---
 
 ## Features
